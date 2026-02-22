@@ -540,32 +540,50 @@ const CommunityTab = ({ showToast }: { showToast: (msg: string) => void }) => {
   const [showImageInput, setShowImageInput] = useState(false);
 
   const fetchPosts = async () => {
-    // Check if seeding is needed
-    const { count } = await supabase.from('community_posts').select('*', { count: 'exact', head: true });
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
 
-    if (count === 0) {
-      // Seed with mock posts from data.ts
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const mockPosts = COMMUNITY_POSTS.slice(0, 5).map(mp => ({
-          user_id: user.id, // Assign to current user for seeding demo purposes
-          text: mp.text,
-          image_url: mp.image || null,
-          created_at: new Date().toISOString()
-        }));
-        await supabase.from('community_posts').insert(mockPosts);
+      const today = new Date().toISOString().split('T')[0];
+
+      // Check for daily AI posts
+      const { count: aiCount } = await supabase
+        .from('community_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_ai', true)
+        .gte('created_at', today);
+
+      if (aiCount === 0) {
+        // Seed new AI posts for today
+        // Pick 3 random realistic posts from data.ts
+        const daySeed = new Date().getDate();
+        const seededPosts = [];
+        for (let i = 0; i < 3; i++) {
+          const mockIdx = (daySeed + i) % COMMUNITY_POSTS.length;
+          const mp = COMMUNITY_POSTS[mockIdx];
+          seededPosts.push({
+            is_ai: true,
+            ai_user_name: mp.user,
+            ai_avatar_url: mp.avatar,
+            text: mp.text,
+            image_url: mp.image || null,
+            created_at: new Date().toISOString()
+          });
+        }
+        await supabase.from('community_posts').insert(seededPosts);
       }
-    }
 
-    const { data, error } = await supabase
-      .from('community_posts')
-      .select('*, profiles(name, avatar_url)')
-      .order('created_at', { ascending: false });
+      // Fetch posts: (AI posts) OR (Current User's posts)
+      const { data, error } = await supabase
+        .from('community_posts')
+        .select('*, profiles(name, avatar_url)')
+        .or(`is_ai.eq.true,user_id.eq.${session.user.id}`)
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching posts:', error);
-    } else {
+      if (error) throw error;
       setPosts(data || []);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
     }
   };
 
@@ -676,12 +694,18 @@ const CommunityTab = ({ showToast }: { showToast: (msg: string) => void }) => {
               {/* Post Header */}
               <div className="p-4 flex items-center space-x-3">
                 <div className="relative">
-                  <img src={post.profiles?.avatar_url || `https://i.pravatar.cc/150?u=${post.user_id}`} alt={post.profiles?.name} className="w-10 h-10 rounded-full object-cover border border-stone-100" />
+                  <img
+                    src={post.is_ai ? post.ai_avatar_url : "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=150&auto=format&fit=crop&q=60"}
+                    alt={post.is_ai ? post.ai_user_name : post.profiles?.name}
+                    className="w-10 h-10 rounded-full object-cover border border-stone-100"
+                  />
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
                 </div>
                 <div>
-                  <h4 className="font-bold text-stone-800 text-sm">{post.profiles?.name || 'Usuário'}</h4>
-                  <p className="text-xs text-stone-400">{new Date(post.created_at).toLocaleDateString('pt-BR')}</p>
+                  <h4 className="font-bold text-stone-800 text-sm">{post.is_ai ? post.ai_user_name : (post.profiles?.name || 'Eu')}</h4>
+                  <p className="text-xs text-stone-400">
+                    {post.is_ai ? 'Hoje' : new Date(post.created_at).toLocaleDateString('pt-BR')}
+                  </p>
                 </div>
               </div>
 

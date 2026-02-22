@@ -64,10 +64,8 @@ export default function Auth({ onSession }: AuthProps) {
                     <div className="w-16 h-16 bg-blue-900 rounded-2xl flex items-center justify-center text-white mb-4 shadow-xl shadow-blue-900/20">
                         <BookOpen size={32} />
                     </div>
-                    <h1 className="text-2xl font-serif font-bold text-blue-900">Jornada Espiritual</h1>
-                    <p className="text-stone-400 text-sm font-medium mt-1">
-                        {isLogin ? 'Bem-vindo de volta' : 'Crie sua conta gratuita'}
-                    </p>
+                    <h1 className="text-2xl font-serif font-bold text-blue-900">Jornada Cristã</h1>
+                    {isLogin ? 'Bem-vindo de volta' : 'Crie sua conta'}
                 </div>
 
                 <form onSubmit={handleAuth} className="space-y-4">

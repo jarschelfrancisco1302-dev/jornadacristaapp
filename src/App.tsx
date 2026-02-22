@@ -99,7 +99,7 @@ const HomeTab = ({ profile, dailyContent, showToast }: any) => {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'Jornada Espiritual',
+        title: 'Jornada Cristã',
         text: 'Confira este versículo do dia!',
         url: window.location.href,
       }).catch(() => showToast("Link copiado!"));
@@ -572,6 +572,7 @@ export default function App() {
   const [dailyContent, setDailyContent] = useState<any>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -579,100 +580,138 @@ export default function App() {
   };
 
   const fetchProfileAndStreak = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (error) {
-      console.error('Error fetching profile:', error);
-      return;
-    }
+      if (fetchError) throw fetchError;
+      setProfile(data);
 
-    setProfile(data);
+      const today = new Date().toISOString().split('T')[0];
+      const lastCheckIn = data.last_check_in;
 
-    // Update streak logic
-    const today = new Date().toISOString().split('T')[0];
-    const lastCheckIn = data.last_check_in;
+      if (lastCheckIn !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-    if (lastCheckIn !== today) {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
+        let newStreak = 1;
+        if (lastCheckIn === yesterdayStr) {
+          newStreak = (data.streak || 0) + 1;
+        }
 
-      let newStreak = 1;
-      if (lastCheckIn === yesterdayStr) {
-        newStreak = (data.streak || 0) + 1;
+        await supabase.from('profiles').update({
+          streak: newStreak,
+          last_check_in: today
+        }).eq('id', userId);
+
+        setProfile({ ...data, streak: newStreak });
+        showToast(`Ofensiva atualizada: ${newStreak} dias!`);
       }
-
-      await supabase.from('profiles').update({
-        streak: newStreak,
-        last_check_in: today
-      }).eq('id', userId);
-
-      setProfile({ ...data, streak: newStreak });
-      showToast(`Ofensiva atualizada: ${newStreak} dias!`);
+    } catch (e: any) {
+      console.error('Erro ao buscar perfil:', e);
     }
   };
 
   const fetchDailyContent = async () => {
-    const today = new Date().toISOString().split('T')[0];
-    const { data, error } = await supabase
-      .from('daily_content')
-      .select('*')
-      .eq('id', today)
-      .single();
-
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error fetching daily content:', error);
-      return;
-    }
-
-    if (data) {
-      setDailyContent(data);
-    } else {
-      // Generate new daily content
-      const verse = await getDailyVerse();
-
-      // Try to generate a reflection
-      const reflection = await getVerseReflection(verse);
-
-      const { data: newData, error: insertError } = await supabase
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error: fetchError } = await supabase
         .from('daily_content')
-        .insert({
-          id: today,
-          verse: verse,
-          reflection: reflection
-        })
-        .select()
+        .select('*')
+        .eq('id', today)
         .single();
 
-      if (!insertError) setDailyContent(newData);
+      if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
+
+      if (data) {
+        setDailyContent(data);
+      } else {
+        const verse = await getDailyVerse();
+        const reflection = await getVerseReflection(verse);
+
+        const { data: newData, error: insertError } = await supabase
+          .from('daily_content')
+          .insert({
+            id: today,
+            verse: verse,
+            reflection: reflection
+          })
+          .select()
+          .single();
+
+        if (!insertError) setDailyContent(newData);
+      }
+    } catch (e: any) {
+      console.error('Erro ao buscar conteúdo diário:', e);
     }
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) fetchProfileAndStreak(session.user.id);
-      setLoading(false);
-    });
+    // Check if Supabase is configured
+    const url = import.meta.env.VITE_SUPABASE_URL;
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) fetchProfileAndStreak(session.user.id);
+    if (!url || !key) {
+      console.error("Supabase config missing");
+      setError("Configuração do Supabase não encontrada. Verifique se o arquivo .env existe e contém as chaves necessárias.");
+      setLoading(false);
+      return;
+    }
+
+    // Wrap initialization in try-catch
+    const initApp = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        setSession(currentSession);
+        if (currentSession) await fetchProfileAndStreak(currentSession.user.id);
+        setLoading(false);
+      } catch (e: any) {
+        console.error("Erro na inicialização:", e);
+        setError("Não foi possível conectar ao banco de dados. Verifique sua conexão ou as chaves no arquivo .env.");
+        setLoading(false);
+      }
+    };
+
+    initApp();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      if (newSession) fetchProfileAndStreak(newSession.user.id);
     });
 
     fetchDailyContent();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      if (authListener?.subscription) authListener.subscription.unsubscribe();
+    };
   }, []);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-stone-50 flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-blue-900 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-stone-50 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+          <X size={32} />
+        </div>
+        <h2 className="text-xl font-bold text-stone-800 mb-2">Ops! Algo deu errado</h2>
+        <p className="text-stone-500 text-sm max-w-xs">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-6 bg-blue-900 text-white px-6 py-2 rounded-xl font-medium"
+        >
+          Tentar novamente
+        </button>
       </div>
     );
   }

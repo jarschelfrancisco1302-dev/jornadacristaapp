@@ -223,10 +223,12 @@ const HomeTab = ({ profile, setProfile, dailyContent, showToast }: any) => {
 
                     // Update profile count and XP
                     const newCount = (profile?.devotionals_count || 0) + 1;
-                    await supabase.from('profiles').update({
+                    const { data: updatedProfile, error: profileError } = await supabase.from('profiles').update({
                       devotionals_count: newCount,
                       progress: (profile?.progress || 0) + 30 // Smaller reward for reflection
-                    }).eq('id', session.user.id);
+                    }).eq('id', session.user.id).select().single();
+
+                    if (profileError) throw profileError;
 
                     // Add to history
                     await supabase.from('reading_history').insert({
@@ -289,10 +291,12 @@ const HomeTab = ({ profile, setProfile, dailyContent, showToast }: any) => {
 
                 // Update profile count
                 const newCount = (profile?.devotionals_count || 0) + 1;
-                await supabase.from('profiles').update({
+                const { data: updatedProfile, error: profileError } = await supabase.from('profiles').update({
                   devotionals_count: newCount,
                   progress: (profile?.progress || 0) + 50
-                }).eq('id', session.user.id);
+                }).eq('id', session.user.id).select().single();
+
+                if (profileError) throw profileError;
 
                 // Add to history
                 await supabase.from('reading_history').insert({

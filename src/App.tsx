@@ -19,11 +19,12 @@ import {
   Flame,
   Lock,
   X,
-  LogOut
+  LogOut,
+  ArrowRight
 } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
 import Auth from './components/Auth';
-import { ORDER_BUMPS, MESSAGES } from './data';
+import { ORDER_BUMPS, MESSAGES, COMMUNITY_POSTS } from './data';
 import { getVerseReflection, getDailyVerse } from './aiService';
 
 // --- Components ---

@@ -81,7 +81,7 @@ const Card = ({ children, className = "" }: { children: React.ReactNode, classNa
 
 // --- Tabs ---
 
-const HomeTab = ({ profile, dailyContent, showToast }: any) => {
+const HomeTab = ({ profile, setProfile, dailyContent, showToast }: any) => {
   const [markedDone, setMarkedDone] = useState(false);
   const [aiReflection, setAiReflection] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -234,6 +234,9 @@ const HomeTab = ({ profile, dailyContent, showToast }: any) => {
                       reading_date: today
                     }).select().maybeSingle();
 
+                    // Update local state to trigger UI updates
+                    if (updatedProfile) setProfile(updatedProfile);
+
                     showToast("Reflexão concluída! +30 XP");
                   } catch (e: any) {
                     console.error(e);
@@ -297,6 +300,8 @@ const HomeTab = ({ profile, dailyContent, showToast }: any) => {
                   reading_date: today
                 });
 
+                // Update local states
+                if (updatedProfile) setProfile(updatedProfile);
                 setMarkedDone(true);
                 showToast("Devocional concluído! +50 XP");
               } catch (e: any) {
@@ -907,7 +912,7 @@ export default function App() {
               exit={{ opacity: 0, scale: 1.02 }}
               transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
             >
-              <HomeTab profile={profile} dailyContent={dailyContent} showToast={showToast} />
+              <HomeTab profile={profile} setProfile={setProfile} dailyContent={dailyContent} showToast={showToast} />
             </motion.div>
           )}
           {activeTab === 'progress' && (

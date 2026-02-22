@@ -141,6 +141,18 @@ const HomeTab = ({ profile, dailyContent, showToast }: any) => {
         </div>
       </div>
 
+      {/* Stats Quick View (Mobile Friendly) */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm">
+          <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Devocionais</p>
+          <p className="text-xl font-bold text-blue-900">{profile?.devotionals_count || 0}</p>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm">
+          <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Nível</p>
+          <p className="text-xl font-bold text-blue-900">{profile?.level?.split(' ')[0] || 'Discípulo'}</p>
+        </div>
+      </div>
+
       {/* Verse of the Day */}
       <Card className="relative overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white border-none shadow-2xl shadow-blue-900/30 min-h-[220px] flex flex-col justify-center">
         <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12">
@@ -234,9 +246,33 @@ const HomeTab = ({ profile, dailyContent, showToast }: any) => {
             Muitas vezes nos preocupamos com o amanhã, mas Deus já está lá. A confiança não é saber o que vai acontecer, mas saber QUEM está no controle. Hoje, entregue suas ansiedades e descanse na soberania do Pai.
           </p>
           <button
-            onClick={() => {
-              setMarkedDone(!markedDone);
-              if (!markedDone) showToast("Devocional concluído! +50 XP");
+            onClick={async () => {
+              if (markedDone) return;
+              try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) throw new Error('Not authenticated');
+
+                const today = new Date().toISOString().split('T')[0];
+
+                // Update profile count
+                const newCount = (profile?.devotionals_count || 0) + 1;
+                await supabase.from('profiles').update({
+                  devotionals_count: newCount,
+                  progress: (profile?.progress || 0) + 50
+                }).eq('id', session.user.id);
+
+                // Add to history
+                await supabase.from('reading_history').insert({
+                  user_id: session.user.id,
+                  reading_date: today
+                });
+
+                setMarkedDone(true);
+                showToast("Devocional concluído! +50 XP");
+              } catch (e: any) {
+                console.error(e);
+                showToast("Erro ao salvar progresso.");
+              }
             }}
             className={`w-full py-3 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 ${markedDone
               ? 'bg-green-100 text-green-700'
@@ -335,6 +371,35 @@ const HomeTab = ({ profile, dailyContent, showToast }: any) => {
 };
 
 const ProgressTab = ({ profile }: any) => {
+  const [completedDays, setCompletedDays] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        const startStr = startOfMonth.toISOString().split('T')[0];
+
+        const { data, error } = await supabase
+          .from('reading_history')
+          .select('reading_date')
+          .eq('user_id', session.user.id)
+          .gte('reading_date', startStr);
+
+        if (!error && data) {
+          const days = data.map(d => new Date(d.reading_date + 'T00:00:00').getDate());
+          setCompletedDays(days);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchHistory();
+  }, [profile]);
+
   return (
     <div className="space-y-6 pb-24 pt-6 px-4">
       <SectionHeader title="Meu Progresso" subtitle="Sua caminhada espiritual" />
@@ -364,14 +429,14 @@ const ProgressTab = ({ profile }: any) => {
         <div className="h-3 w-full bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: `${(profile?.progress || 0) / 20}%` }}
+            animate={{ width: `${Math.min((profile?.progress || 0) / 20, 100)}%` }}
             transition={{ duration: 1.5, ease: "easeOut" }}
             className="h-full bg-gradient-to-r from-amber-400 to-amber-600 shadow-[0_0_10px_rgba(251,191,36,0.5)]"
           />
         </div>
       </Card>
 
-      {/* Streak */}
+      {/* Streak and Count */}
       <div className="grid grid-cols-2 gap-4">
         <Card className="flex flex-col items-center justify-center py-6 border-orange-100 bg-orange-50/50">
           <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mb-2 shadow-sm">
@@ -384,7 +449,7 @@ const ProgressTab = ({ profile }: any) => {
           <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mb-2 shadow-sm">
             <CheckCircle size={24} />
           </div>
-          <span className="text-3xl font-bold text-stone-800">5</span>
+          <span className="text-3xl font-bold text-stone-800">{profile?.devotionals_count || 0}</span>
           <span className="text-xs text-stone-500 font-medium uppercase tracking-wide">Devocionais Lidos</span>
         </Card>
       </div>
@@ -394,26 +459,26 @@ const ProgressTab = ({ profile }: any) => {
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-stone-800 flex items-center gap-2">
             <Calendar size={18} className="text-blue-900" />
-            Fevereiro 2026
+            {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
           </h3>
         </div>
         <div className="grid grid-cols-7 gap-2 text-center text-sm">
           {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => (
             <span key={i} className="text-stone-400 text-xs font-bold">{d}</span>
           ))}
-          {Array.from({ length: 28 }).map((_, i) => {
+          {Array.from({ length: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate() }).map((_, i) => {
             const day = i + 1;
             const isToday = day === new Date().getDate();
-            const isCompleted = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 16, 17, 18, 19].includes(day);
+            const isCompleted = completedDays.includes(day);
 
             return (
               <div
                 key={i}
                 className={`
                   aspect-square flex items-center justify-center rounded-full text-xs transition-all duration-300
-                  ${isToday ? 'bg-blue-900 text-white font-bold shadow-md scale-110' : ''}
-                  ${isCompleted && !isToday ? 'bg-green-100 text-green-700 font-medium' : ''}
-                  ${!isCompleted && !isToday ? 'text-stone-300' : ''}
+                  ${isToday ? 'border-2 border-blue-900' : ''}
+                  ${isCompleted ? 'bg-green-500 text-white font-bold shadow-md' : 'text-stone-300'}
+                  ${isToday && isCompleted ? 'bg-green-600 border-none' : ''}
                 `}
               >
                 {day}
@@ -429,11 +494,30 @@ const ProgressTab = ({ profile }: any) => {
 const CommunityTab = ({ showToast }: { showToast: (msg: string) => void }) => {
   const [posts, setPosts] = useState<any[]>([]);
   const [newPostText, setNewPostText] = useState('');
+  const [newPostImage, setNewPostImage] = useState('');
   const [isPosting, setIsPosting] = useState(false);
   const [likedPosts, setLikedPosts] = useState<string[]>([]);
   const [expandedComments, setExpandedComments] = useState<string | null>(null);
+  const [showImageInput, setShowImageInput] = useState(false);
 
   const fetchPosts = async () => {
+    // Check if seeding is needed
+    const { count } = await supabase.from('community_posts').select('*', { count: 'exact', head: true });
+
+    if (count === 0) {
+      // Seed with mock posts from data.ts
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const mockPosts = COMMUNITY_POSTS.slice(0, 5).map(mp => ({
+          user_id: user.id, // Assign to current user for seeding demo purposes
+          text: mp.text,
+          image_url: mp.image || null,
+          created_at: new Date().toISOString()
+        }));
+        await supabase.from('community_posts').insert(mockPosts);
+      }
+    }
+
     const { data, error } = await supabase
       .from('community_posts')
       .select('*, profiles(name, avatar_url)')
@@ -461,11 +545,14 @@ const CommunityTab = ({ showToast }: { showToast: (msg: string) => void }) => {
       const { error } = await supabase.from('community_posts').insert({
         user_id: user.id,
         text: newPostText,
+        image_url: newPostImage || null
       });
 
       if (error) throw error;
 
       setNewPostText('');
+      setNewPostImage('');
+      setShowImageInput(false);
       showToast("Post publicado com sucesso!");
       fetchPosts();
     } catch (error: any) {
@@ -486,23 +573,55 @@ const CommunityTab = ({ showToast }: { showToast: (msg: string) => void }) => {
 
   return (
     <div className="space-y-4 pb-24 pt-6 bg-stone-50 min-h-screen">
-      <div className="px-4 flex justify-between items-center sticky top-0 bg-stone-50/95 backdrop-blur-sm z-10 py-2 border-b border-stone-100">
-        <h2 className="text-xl font-serif font-bold text-blue-900">Comunidade</h2>
-        <div className="flex bg-white rounded-full px-4 py-2 shadow-sm border border-stone-100 flex-1 mx-4">
-          <input
-            type="text"
-            placeholder="Compartilhe uma palavra..."
-            value={newPostText}
-            onChange={(e) => setNewPostText(e.target.value)}
-            className="bg-transparent text-sm w-full outline-none"
-          />
+      <div className="px-4 sticky top-0 bg-stone-50/95 backdrop-blur-sm z-10 py-2 border-b border-stone-100">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-xl font-serif font-bold text-blue-900">Comunidade</h2>
           <button
-            onClick={handleCreatePost}
-            disabled={isPosting || !newPostText.trim()}
-            className="text-blue-900 disabled:opacity-30"
+            onClick={() => setShowImageInput(!showImageInput)}
+            className={`p-2 rounded-xl transition-colors ${showImageInput ? 'bg-blue-100 text-blue-900' : 'text-stone-400 hover:bg-stone-100'}`}
           >
             <PlusSquare size={20} />
           </button>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex bg-white rounded-2xl px-4 py-3 shadow-sm border border-stone-100">
+            <input
+              type="text"
+              placeholder="Compartilhe uma palavra..."
+              value={newPostText}
+              onChange={(e) => setNewPostText(e.target.value)}
+              className="bg-transparent text-sm w-full outline-none"
+            />
+            <button
+              onClick={handleCreatePost}
+              disabled={isPosting || !newPostText.trim()}
+              className="text-blue-900 disabled:opacity-30 pl-2"
+            >
+              <ArrowRight size={20} />
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {showImageInput && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="flex bg-white rounded-2xl px-4 py-3 shadow-sm border border-stone-100">
+                  <input
+                    type="url"
+                    placeholder="URL da imagem (opcional)..."
+                    value={newPostImage}
+                    onChange={(e) => setNewPostImage(e.target.value)}
+                    className="bg-transparent text-sm w-full outline-none"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
@@ -530,6 +649,11 @@ const CommunityTab = ({ showToast }: { showToast: (msg: string) => void }) => {
               {/* Post Content */}
               <div className="px-4 pb-2">
                 <p className="text-stone-700 text-sm leading-relaxed mb-3">{post.text}</p>
+                {post.image_url && (
+                  <div className="rounded-2xl overflow-hidden mb-3 border border-stone-100">
+                    <img src={post.image_url} alt="Post content" className="w-full h-auto object-cover max-h-72" />
+                  </div>
+                )}
               </div>
 
               {/* Post Actions */}

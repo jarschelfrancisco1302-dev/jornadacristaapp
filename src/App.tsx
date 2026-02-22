@@ -193,7 +193,7 @@ const HomeTab = ({ profile, dailyContent, showToast }: any) => {
       {/* AI Reflection Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <SectionHeader title="Reflexão com IA" subtitle="Palavras personalizadas para você" />
+          <SectionHeader title="Reflexão" subtitle="Palavras personalizadas para você" />
           <button
             onClick={generateReflection}
             disabled={isGenerating || !dailyContent?.verse}

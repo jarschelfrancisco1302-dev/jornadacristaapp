@@ -210,12 +210,41 @@ const HomeTab = ({ profile, dailyContent, showToast }: any) => {
               animate={{ opacity: 1, y: 0 }}
               className="bg-indigo-50/50 border border-indigo-100 p-5 rounded-3xl"
             >
-              <p className="text-stone-700 italic text-sm leading-relaxed font-medium">
+              <p className="text-stone-700 italic text-sm leading-relaxed font-medium mb-4">
                 "{aiReflection}"
               </p>
-              <div className="mt-3 flex justify-end">
-                <span className="text-[10px] font-bold text-indigo-400 tracking-widest uppercase">Gerado por IA</span>
-              </div>
+              <button
+                onClick={async () => {
+                  try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) throw new Error('Not authenticated');
+
+                    const today = new Date().toISOString().split('T')[0];
+
+                    // Update profile count and XP
+                    const newCount = (profile?.devotionals_count || 0) + 1;
+                    await supabase.from('profiles').update({
+                      devotionals_count: newCount,
+                      progress: (profile?.progress || 0) + 30 // Smaller reward for reflection
+                    }).eq('id', session.user.id);
+
+                    // Add to history
+                    await supabase.from('reading_history').insert({
+                      user_id: session.user.id,
+                      reading_date: today
+                    }).select().maybeSingle();
+
+                    showToast("Reflexão concluída! +30 XP");
+                  } catch (e: any) {
+                    console.error(e);
+                    showToast("Erro ao salvar progresso.");
+                  }
+                }}
+                className="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 transition-all active:scale-[0.98] flex items-center justify-center space-x-2"
+              >
+                <CheckCircle size={18} />
+                <span>Marcar como lido</span>
+              </button>
             </motion.div>
           )}
           {!aiReflection && !isGenerating && (

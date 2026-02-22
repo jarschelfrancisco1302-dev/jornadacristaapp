@@ -87,6 +87,7 @@ export default function Auth({ onSession }: AuthProps) {
                                     onChange={(e) => setFullName(e.target.value)}
                                     className="w-full bg-stone-50 border border-stone-100 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 transition-all"
                                     required={!isLogin}
+                                    autoComplete="name"
                                 />
                             </motion.div>
                         )}
@@ -103,6 +104,7 @@ export default function Auth({ onSession }: AuthProps) {
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full bg-stone-50 border border-stone-100 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 transition-all"
                             required
+                            autoComplete="email"
                         />
                     </div>
 
@@ -117,6 +119,7 @@ export default function Auth({ onSession }: AuthProps) {
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full bg-stone-50 border border-stone-100 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 transition-all"
                             required
+                            autoComplete={isLogin ? "current-password" : "new-password"}
                         />
                     </div>
 

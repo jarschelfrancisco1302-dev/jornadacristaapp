@@ -623,13 +623,17 @@ export default function App() {
         .from('daily_content')
         .select('*')
         .eq('id', today)
-        .single();
+        .maybeSingle();
 
-      if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
+      if (fetchError) throw fetchError;
 
       if (data) {
         setDailyContent(data);
       } else {
+        // Only attempt to generate if session exists to avoid unnecessary 401s
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (!currentSession) return;
+
         const verse = await getDailyVerse();
         const reflection = await getVerseReflection(verse);
 
@@ -641,9 +645,9 @@ export default function App() {
             reflection: reflection
           })
           .select()
-          .single();
+          .maybeSingle();
 
-        if (!insertError) setDailyContent(newData);
+        if (!insertError && newData) setDailyContent(newData);
       }
     } catch (e: any) {
       console.error('Erro ao buscar conteúdo diário:', e);
@@ -652,8 +656,8 @@ export default function App() {
 
   useEffect(() => {
     // Check if Supabase is configured
-    const url = import.meta.env.VITE_SUPABASE_URL;
-    const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    const url = (import.meta as any).env.VITE_SUPABASE_URL;
+    const key = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
 
     if (!url || !key) {
       console.error("Supabase config missing");
@@ -667,7 +671,14 @@ export default function App() {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
-        if (currentSession) await fetchProfileAndStreak(currentSession.user.id);
+
+        if (currentSession) {
+          await Promise.all([
+            fetchProfileAndStreak(currentSession.user.id),
+            fetchDailyContent()
+          ]);
+        }
+
         setLoading(false);
       } catch (e: any) {
         console.error("Erro na inicialização:", e);
@@ -680,10 +691,11 @@ export default function App() {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
-      if (newSession) fetchProfileAndStreak(newSession.user.id);
+      if (newSession) {
+        fetchProfileAndStreak(newSession.user.id);
+        fetchDailyContent();
+      }
     });
-
-    fetchDailyContent();
 
     return () => {
       if (authListener?.subscription) authListener.subscription.unsubscribe();
@@ -772,7 +784,7 @@ export default function App() {
       {/* Profile/Logout Floating Button */}
       <button
         onClick={() => supabase.auth.signOut()}
-        className="fixed top-6 right-6 z-50 p-3 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg border border-stone-100 text-stone-400 hover:text-red-500 transition-colors hidden sm:block"
+        className="fixed top-6 right-6 z-50 p-3 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg border border-stone-100 text-stone-400 hover:text-red-500 transition-colors"
         title="Sair"
       >
         <LogOut size={20} />

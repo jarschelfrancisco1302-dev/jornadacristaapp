@@ -109,8 +109,12 @@ const HomeTab = ({ profile, setProfile, dailyContent, showToast, installApp }: a
     }
   };
 
-  const handleBuy = (title: string) => {
-    showToast(`"${title}" adicionado ao carrinho!`);
+  const handleBuy = (title: string, url?: string) => {
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      showToast(`"${title}" adicionado ao carrinho!`);
+    }
   };
 
   const generateReflection = async () => {
@@ -422,7 +426,7 @@ const HomeTab = ({ profile, setProfile, dailyContent, showToast, installApp }: a
                 <div className="mt-3 flex justify-between items-center">
                   <span className="font-bold text-blue-900 text-sm">{item.price}</span>
                   <button
-                    onClick={() => handleBuy(item.title)}
+                    onClick={() => handleBuy(item.title, (item as any).checkoutUrl)}
                     className="bg-stone-900 text-white text-xs font-medium px-3 py-2 rounded-lg hover:bg-stone-800 transition-colors active:scale-95"
                   >
                     Adicionar

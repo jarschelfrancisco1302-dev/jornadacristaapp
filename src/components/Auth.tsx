@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '../lib/supabaseClient';
 import { Mail, Lock, User, ArrowRight, BookOpen, CheckCircle } from 'lucide-react';
+import InstallBanner from './InstallBanner';
 
 interface AuthProps {
     onSession: (session: any) => void;
@@ -56,28 +57,9 @@ export default function Auth({ onSession, installApp }: AuthProps) {
 
     return (
         <div className="min-h-screen bg-stone-50 flex flex-col items-center justify-center p-6">
-            {installApp && (
-                <div className="w-full max-w-sm mb-4">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl p-5 text-white shadow-xl shadow-blue-900/20 relative overflow-hidden group"
-                    >
-                        <div className="relative z-10 flex items-center justify-between">
-                            <div className="flex-1 pr-4">
-                                <h3 className="font-bold text-lg leading-tight mb-1 font-serif">Acesso Rápido</h3>
-                                <p className="text-white/70 text-xs">Instale o app e facilite seu acesso diário.</p>
-                            </div>
-                            <button
-                                onClick={installApp}
-                                className="bg-white text-blue-900 px-5 py-2.5 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all whitespace-nowrap"
-                            >
-                                Baixar Aplicativo
-                            </button>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
+            <div className="w-full max-w-sm">
+                <InstallBanner installApp={installApp} />
+            </div>
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}

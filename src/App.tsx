@@ -81,7 +81,7 @@ const Card = ({ children, className = "" }: { children: React.ReactNode, classNa
 
 // --- Tabs ---
 
-const HomeTab = ({ profile, setProfile, dailyContent, showToast }: any) => {
+const HomeTab = ({ profile, setProfile, dailyContent, showToast, installApp }: any) => {
   const [markedDone, setMarkedDone] = useState(false);
   const [aiReflection, setAiReflection] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -141,6 +141,34 @@ const HomeTab = ({ profile, setProfile, dailyContent, showToast }: any) => {
           <span className="text-sm font-bold text-orange-700">{profile?.streak || 0}</span>
         </div>
       </div>
+
+      {/* Install App Button (Premium PWA experience) */}
+      <AnimatePresence>
+        {installApp && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            className="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl p-5 text-white shadow-xl shadow-blue-900/20 relative overflow-hidden group"
+          >
+            <div className="absolute top-0 right-0 -mr-6 -mt-6 opacity-10 group-hover:rotate-12 transition-transform duration-700">
+              <PlusSquare size={120} />
+            </div>
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex-1 pr-4">
+                <h3 className="font-bold text-lg leading-tight mb-1">Acesso Rápido</h3>
+                <p className="text-white/70 text-xs">Instale o app e tenha sua jornada espiritual sempre à mão.</p>
+              </div>
+              <button
+                onClick={installApp}
+                className="bg-white text-blue-900 px-5 py-2.5 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all whitespace-nowrap"
+              >
+                Baixar Aplicativo
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Stats Quick View (Mobile Friendly) */}
       <div className="grid grid-cols-2 gap-4">
@@ -760,6 +788,25 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  };
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -940,7 +987,13 @@ export default function App() {
               exit={{ opacity: 0, scale: 1.02 }}
               transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
             >
-              <HomeTab profile={profile} setProfile={setProfile} dailyContent={dailyContent} showToast={showToast} />
+              <HomeTab
+                profile={profile}
+                setProfile={setProfile}
+                dailyContent={dailyContent}
+                showToast={showToast}
+                installApp={deferredPrompt ? handleInstall : null}
+              />
             </motion.div>
           )}
           {activeTab === 'progress' && (

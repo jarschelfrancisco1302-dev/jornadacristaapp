@@ -10,7 +10,7 @@ export async function getDailyVerse() {
     }
 
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
         const prompt = `Escolha um versículo bíblico inspirador e curto para o dia de hoje. Retorne o texto do versículo seguido da referência (Ex: "Versículo" - Referência). Responda apenas com o versículo e a referência, sem mais nada.`;
 
         const result = await model.generateContent(prompt);
@@ -29,7 +29,7 @@ export async function getVerseReflection(verse: string) {
     }
 
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
         const prompt = `Você é um mentor espiritual cristão sábio e acolhedor. Com base no seguinte versículo: "${verse}", escreva uma reflexão curta (máximo 3 frases) e inspiradora para o dia de hoje. Fale diretamente ao coração do leitor, oferecendo paz e propósito. Responda apenas com a reflexão, sem introduções ou comentários adicionais.`;
 
         const result = await model.generateContent(prompt);
@@ -38,5 +38,23 @@ export async function getVerseReflection(verse: string) {
     } catch (error) {
         console.error("Erro ao gerar reflexão:", error);
         return "Não foi possível gerar uma reflexão no momento, mas saiba que a Palavra de Deus sempre tem o poder de renovar suas forças.";
+    }
+}
+
+export async function getPersonalizedReflection(emotion: string) {
+    if (!API_KEY) {
+        return `Sabemos que você está se sentindo ${emotion}. Lembre-se: Deus está no controle e Sua graça te basta para hoje.`;
+    }
+
+    try {
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+        const prompt = `O usuário está se sentindo: "${emotion}". Aja como um mentor espiritual sábio. Escreva um devocional curtíssimo (máximo 3 frases) com um versículo apropriado para esse sentimento e uma palavra de encorajamento. Responda diretamente ao coração do leitor.`;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text();
+    } catch (error) {
+        console.error("Erro ao gerar devocional personalizado:", error);
+        return `Mesmo sentindo-se ${emotion}, confie no Senhor. Ele é o seu refúgio e fortaleza.`;
     }
 }

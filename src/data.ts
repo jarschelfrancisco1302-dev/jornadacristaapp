@@ -27,7 +27,7 @@ export const ORDER_BUMPS = [
     description: "Disciplina Espiritual para transformar sua rotina.",
     price: "R$ 29,90",
     image: "https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    checkoutUrl: "https://pay.kirvano.com/3cdc0e37-fadc-4b48-9313-80e435d4f6ca"
+    checkoutUrl: "https://pay.kiwify.com.br/ZjLxYKc"
   },
   {
     id: 8,
@@ -35,7 +35,7 @@ export const ORDER_BUMPS = [
     description: "Restaure a aliança e a harmonia no seu lar.",
     price: "R$ 59,90",
     image: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    checkoutUrl: "https://pay.kirvano.com/a5aa63b6-672e-432d-8655-3f68d712bfa0"
+    checkoutUrl: "https://pay.kiwify.com.br/CEd1FQC"
   },
   {
     id: 7,
@@ -43,7 +43,7 @@ export const ORDER_BUMPS = [
     description: "Como guiar sua casa nos caminhos do Senhor.",
     price: "R$ 49,90",
     image: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    checkoutUrl: "https://pay.kirvano.com/79b9d417-d05e-4b2c-b444-10da7dccb521"
+    checkoutUrl: "https://pay.kiwify.com.br/e55Dslf"
   },
   {
     id: 2,
@@ -51,7 +51,7 @@ export const ORDER_BUMPS = [
     description: "Aprofunde sua conexão com Deus.",
     price: "R$ 19,90",
     image: "https://images.unsplash.com/photo-1507434965515-61970f2bd7c6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    checkoutUrl: "https://pay.kirvano.com/cb964de0-bc3a-4177-bef0-bd1cb4952bc5"
+    checkoutUrl: "https://pay.kiwify.com.br/a2KNL2G"
   },
   {
     id: 3,
@@ -59,7 +59,7 @@ export const ORDER_BUMPS = [
     description: "Aprenda a jejuar com propósito bíblico.",
     price: "R$ 24,90",
     image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    checkoutUrl: "https://pay.kirvano.com/564cfe2c-85d6-458a-be20-6592d7458c7c"
+    checkoutUrl: "https://pay.kiwify.com.br/tUPYNqL"
   },
   {
     id: 4,
@@ -67,7 +67,7 @@ export const ORDER_BUMPS = [
     description: "Força e sabedoria para o dia a dia.",
     price: "R$ 34,90",
     image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    checkoutUrl: "https://pay.kirvano.com/76687598-7980-4ab6-922d-318de3162a51"
+    checkoutUrl: "https://pay.kiwify.com.br/380YxNr"
   },
   {
     id: 5,
@@ -75,7 +75,7 @@ export const ORDER_BUMPS = [
     description: "Graça e virtude em cada página.",
     price: "R$ 34,90",
     image: "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    checkoutUrl: "https://pay.kirvano.com/503c6b92-4154-487c-85d0-0e3e466dacce"
+    checkoutUrl: "https://pay.kiwify.com.br/nATCzfZ"
   },
   {
     id: 6,
@@ -83,7 +83,7 @@ export const ORDER_BUMPS = [
     description: "Princípios cristãos para o amor.",
     price: "R$ 39,90",
     image: "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    checkoutUrl: "https://pay.kirvano.com/45ed4b9c-cce2-489b-850d-0de4f23847cb"
+    checkoutUrl: "https://pay.kiwify.com.br/8HLsQaU"
   }
 ];
 

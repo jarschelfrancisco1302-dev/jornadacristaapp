@@ -36,7 +36,7 @@ export default function CommunityTab({ session, showToast }: { session: any, sho
           <h2 className="text-xl font-serif font-bold text-blue-900">Comunidade</h2>
           <button
             onClick={() => setShowImageInput(!showImageInput)}
-            className={`p-2 rounded-xl transition-colors ${showImageInput ? 'bg-blue-100 text-blue-900' : 'text-stone-400 hover:bg-stone-100:bg-stone-800'}`}
+            className={`p-2 rounded-xl transition-colors ${showImageInput ? 'bg-blue-100 text-blue-900' : 'text-stone-400 hover:bg-stone-100'}`}
           >
             <PlusSquare size={20} />
           </button>
@@ -125,14 +125,14 @@ export default function CommunityTab({ session, showToast }: { session: any, sho
                 <div className="flex space-x-6">
                   <button
                     onClick={() => toggleLike(post.id)}
-                    className={`flex items-center space-x-1.5 text-sm font-medium transition-colors ${likedPosts.includes(post.id) ? 'text-red-500' : 'text-stone-500 hover:text-stone-800:text-stone-200'}`}
+                    className={`flex items-center space-x-1.5 text-sm font-medium transition-colors ${likedPosts.includes(post.id) ? 'text-red-500' : 'text-stone-500 hover:text-stone-800'}`}
                   >
                     <Heart size={20} className={`transition-transform duration-200 ${likedPosts.includes(post.id) ? 'fill-current scale-110' : ''}`} />
                     <span>{post.likes_count + (likedPosts.includes(post.id) ? 1 : 0)}</span>
                   </button>
                   <button
                     onClick={() => setExpandedComments(expandedComments === post.id ? null : post.id)}
-                    className={`flex items-center space-x-1.5 text-sm font-medium transition-colors ${expandedComments === post.id ? 'text-blue-900' : 'text-stone-500 hover:text-stone-800:text-stone-200'}`}
+                    className={`flex items-center space-x-1.5 text-sm font-medium transition-colors ${expandedComments === post.id ? 'text-blue-900' : 'text-stone-500 hover:text-stone-800'}`}
                   >
                     <MessageCircle size={20} />
                     <span>{post.comments_count}</span>
@@ -140,7 +140,7 @@ export default function CommunityTab({ session, showToast }: { session: any, sho
                 </div>
                 <button
                   onClick={() => showToast("Link copiado!")}
-                  className="text-stone-400 hover:text-stone-800:text-stone-300 transition-colors"
+                  className="text-stone-400 hover:text-stone-800 transition-colors"
                 >
                   <Share2 size={20} />
                 </button>

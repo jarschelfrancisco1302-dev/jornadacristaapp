@@ -7,7 +7,7 @@ import { getVerseReflection, getPersonalizedReflection } from '../aiService';
 import InstallBanner from '../components/InstallBanner';
 import { Card, SectionHeader } from '../components/Shared';
 
-export default function HomeTab({ profile, setProfile, dailyContent, showToast, installApp }: any) {
+export default function HomeTab({ profile, setProfile, dailyContent, showToast, installApp, triggerBump }: any) {
   const [markedDone, setMarkedDone] = useState(false);
   const [aiReflection, setAiReflection] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -219,6 +219,7 @@ export default function HomeTab({ profile, setProfile, dailyContent, showToast, 
                     if (updatedProfile) setProfile(updatedProfile);
 
                     showToast("Reflexão concluída! +30 XP");
+                    triggerBump?.(); // dispara order bump após marcar como lido
                   } catch (e: any) {
                     console.error(e);
                     showToast("Erro ao salvar progresso.");
@@ -234,12 +235,12 @@ export default function HomeTab({ profile, setProfile, dailyContent, showToast, 
           {(!aiReflection || emotion) && !isGenerating && (
             <button
               onClick={generateReflection}
-              className="w-full py-6 border-2 border-dashed border-stone-200 rounded-3xl flex flex-col items-center justify-center space-y-2 group hover:border-indigo-300:border-indigo-500 transition-colors mt-4"
+              className="w-full py-6 border-2 border-dashed border-stone-200 rounded-3xl flex flex-col items-center justify-center space-y-2 group hover:border-indigo-300 transition-colors mt-4"
             >
-              <div className="p-3 bg-stone-100 rounded-2xl group-hover:bg-indigo-50:bg-indigo-900/50 transition-colors">
+              <div className="p-3 bg-stone-100 rounded-2xl group-hover:bg-indigo-50 transition-colors">
                 <Flame size={24} className="text-stone-400 group-hover:text-indigo-500" />
               </div>
-              <span className="text-sm font-bold text-stone-500 group-hover:text-indigo-600:text-indigo-400 uppercase tracking-widest">
+              <span className="text-sm font-bold text-stone-500 group-hover:text-indigo-600 uppercase tracking-widest">
                 {emotion ? 'Gerar reflexão para este sentimento' : 'Obter reflexão espiritual'}
               </span>
             </button>
@@ -265,7 +266,7 @@ export default function HomeTab({ profile, setProfile, dailyContent, showToast, 
               </div>
               <button
                 onClick={() => handleCopy(msg.text)}
-                className="self-end flex items-center space-x-1 text-amber-700 text-xs font-medium hover:bg-amber-100:bg-amber-900/50 px-3 py-2 rounded-lg transition-colors"
+                className="self-end flex items-center space-x-1 text-amber-700 text-xs font-medium hover:bg-amber-100 px-3 py-2 rounded-lg transition-colors"
               >
                 <Copy size={14} />
                 <span>Copiar</span>

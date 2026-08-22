@@ -18,11 +18,13 @@ import ProfileTab from './pages/Profile';
 import { Toast } from './components/Shared';
 import { getDailyVerse, getVerseReflection } from './aiService';
 import { useUserProgress } from './hooks/useUserProgress';
+import { useOrderBump } from './hooks/useOrderBump';
+import OrderBumpModal from './components/OrderBumpModal';
 
 const TabButton = ({ active, icon: Icon, label, onClick }: any) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-300 relative ${active ? 'text-blue-900' : 'text-stone-400 hover:text-stone-600:text-stone-300'
+    className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-300 relative ${active ? 'text-blue-900' : 'text-stone-400 hover:text-stone-600'
       }`}
   >
     <motion.div
@@ -52,6 +54,8 @@ export default function App() {
 
   // Hook para perfil
   const { profile, setProfile } = useUserProgress(session);
+  // Hook para order bumps
+  const { activeBump, closeBump, triggerBump } = useOrderBump();
 
   useEffect(() => {
     const handler = (e: any) => {
@@ -194,6 +198,9 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* Order Bump Modal */}
+      <OrderBumpModal bump={activeBump} onClose={closeBump} />
+
       {/* Content Area */}
       <div className="h-full overflow-y-auto scrollbar-hide bg-stone-50/50">
         <AnimatePresence mode="wait">
@@ -211,6 +218,7 @@ export default function App() {
                 dailyContent={dailyContent}
                 showToast={showToast}
                 installApp={deferredPrompt ? handleInstall : null}
+                triggerBump={triggerBump}
               />
             </motion.div>
           )}

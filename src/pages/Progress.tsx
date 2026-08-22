@@ -45,18 +45,18 @@ export default function ProgressTab({ session }: { session: any }) {
 
       {/* Streak and Count */}
       <div className="grid grid-cols-2 gap-4">
-        <Card className="flex flex-col items-center justify-center py-6 border-orange-100 bg-orange-50/50 dark:bg-orange-900/20">
-          <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-orange-600 mb-2 shadow-sm">
+        <Card className="flex flex-col items-center justify-center py-6 border-orange-100 bg-orange-50/50">
+          <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mb-2 shadow-sm">
             <Flame size={24} className="fill-orange-600" />
           </div>
-          <span className="text-3xl font-bold text-stone-800 dark:text-white">{profile?.streak || 0}</span>
+          <span className="text-3xl font-bold text-stone-800">{profile?.streak || 0}</span>
           <span className="text-xs text-stone-500 font-medium uppercase tracking-wide">Dias de Ofensiva</span>
         </Card>
-        <Card className="flex flex-col items-center justify-center py-6 border-blue-100 bg-blue-50/50 dark:bg-blue-900/20">
-          <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 mb-2 shadow-sm">
+        <Card className="flex flex-col items-center justify-center py-6 border-blue-100 bg-blue-50/50">
+          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mb-2 shadow-sm">
             <CheckCircle size={24} />
           </div>
-          <span className="text-3xl font-bold text-stone-800 dark:text-white">{profile?.devotionals_count || 0}</span>
+          <span className="text-3xl font-bold text-stone-800">{profile?.devotionals_count || 0}</span>
           <span className="text-xs text-stone-500 font-medium uppercase tracking-wide">Devocionais Lidos</span>
         </Card>
       </div>
@@ -64,8 +64,8 @@ export default function ProgressTab({ session }: { session: any }) {
       {/* Calendar Preview */}
       <Card>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-stone-800 dark:text-white flex items-center gap-2">
-            <Calendar size={18} className="text-blue-900 dark:text-blue-400" />
+          <h3 className="font-bold text-stone-800 flex items-center gap-2">
+            <Calendar size={18} className="text-blue-900" />
             {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
           </h3>
         </div>
@@ -83,8 +83,8 @@ export default function ProgressTab({ session }: { session: any }) {
                 key={i}
                 className={`
                   aspect-square flex items-center justify-center rounded-full text-xs transition-all duration-300
-                  ${isToday ? 'border-2 border-blue-900 dark:border-blue-500' : ''}
-                  ${isCompleted ? 'bg-green-500 text-white font-bold shadow-md' : 'text-stone-300 dark:text-stone-600'}
+                  ${isToday ? 'border-2 border-blue-900' : ''}
+                  ${isCompleted ? 'bg-green-500 text-white font-bold shadow-md' : 'text-stone-300'}
                   ${isToday && isCompleted ? 'bg-green-600 border-none' : ''}
                 `}
               >

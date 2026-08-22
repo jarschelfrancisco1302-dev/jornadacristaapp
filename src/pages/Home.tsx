@@ -88,16 +88,16 @@ export default function HomeTab({ profile, setProfile, dailyContent, showToast, 
   const today = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
 
   return (
-    <div className="space-y-6 pb-24 pt-6 px-4 dark:bg-stone-900">
+    <div className="space-y-6 pb-24 pt-6 px-4">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <p className="text-sm text-stone-500 dark:text-stone-400 font-medium">{today}</p>
-          <h1 className="text-2xl font-serif font-bold text-blue-900 dark:text-blue-400">A Paz do Senhor, {profile?.name?.split(' ')[0] || 'Visitante'}</h1>
+          <p className="text-sm text-stone-500 font-medium">{today}</p>
+          <h1 className="text-2xl font-serif font-bold text-blue-900">A Paz do Senhor, {profile?.name?.split(' ')[0] || 'Visitante'}</h1>
         </div>
-        <div className="flex items-center space-x-2 bg-orange-50 dark:bg-orange-900/30 px-3 py-1.5 rounded-full border border-orange-100 dark:border-orange-800">
+        <div className="flex items-center space-x-2 bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100">
           <Flame size={16} className="text-orange-500 fill-orange-500" />
-          <span className="text-sm font-bold text-orange-700 dark:text-orange-400">{profile?.streak || 0}</span>
+          <span className="text-sm font-bold text-orange-700">{profile?.streak || 0}</span>
         </div>
       </div>
 
@@ -107,13 +107,13 @@ export default function HomeTab({ profile, setProfile, dailyContent, showToast, 
 
       {/* Stats Quick View */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-stone-800 p-4 rounded-2xl border border-stone-100 dark:border-stone-700 shadow-sm">
+        <div className="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm">
           <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Devocionais</p>
-          <p className="text-xl font-bold text-blue-900 dark:text-blue-400">{profile?.devotionals_count || 0}</p>
+          <p className="text-xl font-bold text-blue-900">{profile?.devotionals_count || 0}</p>
         </div>
-        <div className="bg-white dark:bg-stone-800 p-4 rounded-2xl border border-stone-100 dark:border-stone-700 shadow-sm">
+        <div className="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm">
           <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Nível</p>
-          <p className="text-xl font-bold text-blue-900 dark:text-blue-400">{profile?.level?.split(' ')[0] || 'Discípulo'}</p>
+          <p className="text-xl font-bold text-blue-900">{profile?.level?.split(' ')[0] || 'Discípulo'}</p>
         </div>
       </div>
 
@@ -166,14 +166,14 @@ export default function HomeTab({ profile, setProfile, dailyContent, showToast, 
         </div>
         
         {/* Input de emoção para devocional personalizado */}
-        <div className="mb-4 bg-white dark:bg-stone-800 p-3 rounded-2xl flex items-center shadow-sm border border-stone-100 dark:border-stone-700">
+        <div className="mb-4 bg-white p-3 rounded-2xl flex items-center shadow-sm border border-stone-100">
           <Smile className="text-stone-400 mr-2" size={20} />
           <input 
             type="text" 
             placeholder="Como você está se sentindo hoje? (ex: Ansioso)"
             value={emotion}
             onChange={(e) => setEmotion(e.target.value)}
-            className="w-full bg-transparent text-sm outline-none dark:text-white"
+            className="w-full bg-transparent text-sm outline-none"
           />
         </div>
 
@@ -182,10 +182,10 @@ export default function HomeTab({ profile, setProfile, dailyContent, showToast, 
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 p-5 rounded-3xl"
+              className="bg-indigo-50/50 border border-indigo-100 p-5 rounded-3xl"
             >
               <div className="flex justify-between items-start mb-4">
-                <p className="text-stone-700 dark:text-stone-300 italic text-sm leading-relaxed font-medium">
+                <p className="text-stone-700 italic text-sm leading-relaxed font-medium">
                   "{aiReflection}"
                 </p>
                 <button 
@@ -231,16 +231,16 @@ export default function HomeTab({ profile, setProfile, dailyContent, showToast, 
               </button>
             </motion.div>
           )}
-          {!aiReflection && !isGenerating && (
+          {(!aiReflection || emotion) && !isGenerating && (
             <button
               onClick={generateReflection}
-              className="w-full py-6 border-2 border-dashed border-stone-200 dark:border-stone-700 rounded-3xl flex flex-col items-center justify-center space-y-2 group hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors"
+              className="w-full py-6 border-2 border-dashed border-stone-200 rounded-3xl flex flex-col items-center justify-center space-y-2 group hover:border-indigo-300:border-indigo-500 transition-colors mt-4"
             >
-              <div className="p-3 bg-stone-100 dark:bg-stone-800 rounded-2xl group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/50 transition-colors">
-                <Flame size={24} className="text-stone-400 dark:text-stone-500 group-hover:text-indigo-500" />
+              <div className="p-3 bg-stone-100 rounded-2xl group-hover:bg-indigo-50:bg-indigo-900/50 transition-colors">
+                <Flame size={24} className="text-stone-400 group-hover:text-indigo-500" />
               </div>
-              <span className="text-sm font-bold text-stone-500 dark:text-stone-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 uppercase tracking-widest">
-                {emotion ? 'Gerar reflexão personalizada' : 'Obter reflexão espiritual'}
+              <span className="text-sm font-bold text-stone-500 group-hover:text-indigo-600:text-indigo-400 uppercase tracking-widest">
+                {emotion ? 'Gerar reflexão para este sentimento' : 'Obter reflexão espiritual'}
               </span>
             </button>
           )}
@@ -258,14 +258,14 @@ export default function HomeTab({ profile, setProfile, dailyContent, showToast, 
         <SectionHeader title="Mensagens para Compartilhar" />
         <div className="flex overflow-x-auto space-x-4 pb-4 -mx-4 px-4 scrollbar-hide">
           {MESSAGES.map((msg, idx) => (
-            <div key={idx} className="min-w-[260px] bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-5 border border-amber-100 dark:border-amber-900 flex flex-col justify-between h-[180px] hover:border-amber-200 transition-colors shadow-sm">
+            <div key={idx} className="min-w-[260px] bg-amber-50 rounded-2xl p-5 border border-amber-100 flex flex-col justify-between h-[180px] hover:border-amber-200 transition-colors shadow-sm">
               <div>
-                <span className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-wider bg-amber-100 dark:bg-amber-900/50 px-2 py-1 rounded-md">{msg.category}</span>
-                <p className="mt-3 text-stone-800 dark:text-stone-300 font-serif italic text-sm leading-relaxed">"{msg.text}"</p>
+                <span className="text-xs font-bold text-amber-600 uppercase tracking-wider bg-amber-100 px-2 py-1 rounded-md">{msg.category}</span>
+                <p className="mt-3 text-stone-800 font-serif italic text-sm leading-relaxed">"{msg.text}"</p>
               </div>
               <button
                 onClick={() => handleCopy(msg.text)}
-                className="self-end flex items-center space-x-1 text-amber-700 dark:text-amber-500 text-xs font-medium hover:bg-amber-100 dark:hover:bg-amber-900/50 px-3 py-2 rounded-lg transition-colors"
+                className="self-end flex items-center space-x-1 text-amber-700 text-xs font-medium hover:bg-amber-100:bg-amber-900/50 px-3 py-2 rounded-lg transition-colors"
               >
                 <Copy size={14} />
                 <span>Copiar</span>
@@ -278,31 +278,31 @@ export default function HomeTab({ profile, setProfile, dailyContent, showToast, 
       {/* Order Bumps Section */}
       <div className="pt-4">
         <div className="flex items-center space-x-2 mb-2">
-          <div className="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
+          <div className="p-1.5 bg-amber-100 rounded-lg">
             <Flame className="text-amber-500 fill-amber-500" size={20} />
           </div>
-          <h2 className="text-xl font-serif font-bold text-stone-800 dark:text-stone-200">Aprofunde sua Jornada</h2>
+          <h2 className="text-xl font-serif font-bold text-stone-800">Aprofunde sua Jornada</h2>
         </div>
-        <p className="text-sm text-stone-500 dark:text-stone-400 mb-4 px-1">
-          Invista no seu crescimento espiritual com nossos materiais exclusivos. <span className="text-amber-600 dark:text-amber-500 font-bold">Oferta especial por tempo limitado!</span>
+        <p className="text-sm text-stone-500 mb-4 px-1">
+          Invista no seu crescimento espiritual com nossos materiais exclusivos. <span className="text-amber-600 font-bold">Oferta especial por tempo limitado!</span>
         </p>
         <div className="grid grid-cols-1 gap-4">
           {ORDER_BUMPS.map((item) => (
-            <div key={item.id} className="bg-white dark:bg-stone-800 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-700 overflow-hidden flex hover:shadow-md transition-shadow duration-300">
+            <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden flex hover:shadow-md transition-shadow duration-300">
               <div className="w-1/3 relative group aspect-[3/4]">
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
               </div>
               <div className="w-2/3 p-4 flex flex-col justify-between">
                 <div>
-                  <h3 className="font-bold text-stone-800 dark:text-stone-200 leading-tight mb-1 text-sm">{item.title}</h3>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 line-clamp-2">{item.description}</p>
+                  <h3 className="font-bold text-stone-800 leading-tight mb-1 text-sm">{item.title}</h3>
+                  <p className="text-xs text-stone-500 line-clamp-2">{item.description}</p>
                 </div>
                 <div className="mt-3 flex justify-between items-center">
-                  <span className="font-bold text-blue-900 dark:text-blue-400 text-sm">{item.price}</span>
+                  <span className="font-bold text-blue-900 text-sm">{item.price}</span>
                   <button
                     onClick={() => handleBuy(item.title, (item as any).checkoutUrl)}
-                    className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-medium px-3 py-2 rounded-lg hover:bg-stone-800 transition-colors active:scale-95"
+                    className="bg-stone-900 text-white text-xs font-medium px-3 py-2 rounded-lg hover:bg-stone-800 transition-colors active:scale-95"
                   >
                     Adicionar
                   </button>

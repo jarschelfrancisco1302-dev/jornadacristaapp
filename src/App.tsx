@@ -5,13 +5,16 @@ import {
   BarChart2,
   Users,
   X,
-  LogOut
+  Compass,
+  User
 } from 'lucide-react';
 import { supabase } from './lib/supabaseClient';
 import Auth from './components/Auth';
 import HomeTab from './pages/Home';
 import ProgressTab from './pages/Progress';
 import CommunityTab from './pages/Community';
+import ExploreTab from './pages/Explore';
+import ProfileTab from './pages/Profile';
 import { Toast } from './components/Shared';
 import { getDailyVerse, getVerseReflection } from './aiService';
 import { useUserProgress } from './hooks/useUserProgress';
@@ -19,7 +22,7 @@ import { useUserProgress } from './hooks/useUserProgress';
 const TabButton = ({ active, icon: Icon, label, onClick }: any) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-300 relative ${active ? 'text-blue-900 dark:text-blue-400' : 'text-stone-400 hover:text-stone-600 dark:hover:text-stone-300'
+    className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-300 relative ${active ? 'text-blue-900' : 'text-stone-400 hover:text-stone-600:text-stone-300'
       }`}
   >
     <motion.div
@@ -32,7 +35,7 @@ const TabButton = ({ active, icon: Icon, label, onClick }: any) => (
     {active && (
       <motion.div
         layoutId="tab-indicator"
-        className="absolute -top-2 w-1 h-1 bg-blue-900 dark:bg-blue-400 rounded-full"
+        className="absolute -top-2 w-1 h-1 bg-blue-900 rounded-full"
       />
     )}
   </button>
@@ -153,23 +156,23 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-stone-900 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-blue-900 dark:border-blue-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-blue-900 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-stone-900 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mb-4">
+      <div className="min-h-screen bg-stone-50 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
           <X size={32} />
         </div>
-        <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Ops! Algo deu errado</h2>
-        <p className="text-stone-500 dark:text-stone-400 text-sm max-w-xs">{error}</p>
+        <h2 className="text-xl font-bold text-stone-800 mb-2">Ops! Algo deu errado</h2>
+        <p className="text-stone-500 text-sm max-w-xs">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-6 bg-blue-900 dark:bg-blue-600 text-white px-6 py-2 rounded-xl font-medium"
+          className="mt-6 bg-blue-900 text-white px-6 py-2 rounded-xl font-medium"
         >
           Tentar novamente
         </button>
@@ -182,7 +185,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-900 font-sans text-stone-900 dark:text-stone-100 max-w-md mx-auto shadow-2xl overflow-hidden relative border-x border-stone-200 dark:border-stone-800">
+    <div className="min-h-screen bg-stone-50 font-sans text-stone-900 max-w-md mx-auto shadow-2xl overflow-hidden relative border-x border-stone-200">
       
       {/* Toast Notification */}
       <AnimatePresence>
@@ -192,7 +195,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* Content Area */}
-      <div className="h-full overflow-y-auto scrollbar-hide bg-stone-50/50 dark:bg-stone-900/50">
+      <div className="h-full overflow-y-auto scrollbar-hide bg-stone-50/50">
         <AnimatePresence mode="wait">
           {activeTab === 'home' && (
             <motion.div
@@ -233,20 +236,33 @@ export default function App() {
               <CommunityTab session={session} showToast={showToast} />
             </motion.div>
           )}
+          {activeTab === 'explore' && (
+            <motion.div
+              key="explore"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.02 }}
+              transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <ExploreTab showToast={showToast} />
+            </motion.div>
+          )}
+          {activeTab === 'profile' && (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.02 }}
+              transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <ProfileTab profile={profile} session={session} />
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
 
-      {/* Profile/Logout Floating Button */}
-      <button
-        onClick={() => supabase.auth.signOut()}
-        className="fixed top-6 right-6 z-50 p-3 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-stone-100 dark:border-stone-700 text-stone-400 hover:text-red-500 transition-colors"
-        title="Sair"
-      >
-        <LogOut size={20} />
-      </button>
-
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border-t border-stone-100 dark:border-stone-800 h-[85px] px-8 pb-6 pt-2 flex justify-between items-center z-50">
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 backdrop-blur-xl border-t border-stone-100 h-[85px] px-6 pb-6 pt-2 flex justify-between items-center z-50">
         <TabButton
           active={activeTab === 'home'}
           icon={Home}
@@ -264,6 +280,18 @@ export default function App() {
           icon={Users}
           label="Comunidade"
           onClick={() => setActiveTab('community')}
+        />
+        <TabButton
+          active={activeTab === 'explore'}
+          icon={Compass}
+          label="Explorar"
+          onClick={() => setActiveTab('explore')}
+        />
+        <TabButton
+          active={activeTab === 'profile'}
+          icon={User}
+          label="Perfil"
+          onClick={() => setActiveTab('profile')}
         />
       </div>
     </div>
